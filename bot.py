@@ -2,6 +2,8 @@
 # pip install aiogram sqlalchemy aiosqlite
 
 import logging
+import os
+from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
@@ -11,9 +13,12 @@ from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import json
+import time
 
-API_TOKEN = '6915473619:AAFtuM1-FDx7n7Uqnf2gb7d2tJMIrgcWFeo'
-ADMIN_ID = 2017535015  # Replace with your admin ID
+
+load_dotenv()
+API_TOKEN = os.getenv('TG_API')
+ADMIN_ID = int(os.getenv('ADMIN_ID'))
 
 # Initialize bot and dispatcher
 bot = Bot(token=API_TOKEN)
@@ -21,7 +26,14 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+log_folder = 'logs'
+if not os.path.exists(log_folder):
+    os.makedirs(log_folder)
+
+logging.basicConfig(level=logging.INFO, handlers=[
+    logging.FileHandler(os.path.join(log_folder, f'{str(time.time())}-bot.log'), encoding='utf-8'),
+    logging.StreamHandler()
+])
 logger = logging.getLogger(__name__)
 
 # Database setup
@@ -103,7 +115,7 @@ def main_keyboard(is_admin=False):
     markup.add(KeyboardButton("Profile"), KeyboardButton("Global Ranking"))
     markup.add(KeyboardButton("History"))
     if is_admin:
-        markup.add(KeyboardButton("Change Credits"), KeyboardButton("Add User to Room"))
+        markup.add(KeyboardButton("Change Credits"))
     return markup
 
 

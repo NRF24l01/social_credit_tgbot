@@ -1,3 +1,5 @@
 .venv
 .idea
 social_credits.db
+logs
+.env
