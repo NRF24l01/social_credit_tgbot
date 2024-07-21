@@ -1,0 +1,6 @@
+.venv
+.idea
+__pycashe__
+social_credits.db
+logs
+.env
