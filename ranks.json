@@ -1,0 +1,5 @@
+[
+    {"name": "Novice", "min_soc_credit": 0, "max_soc_credit": 15},
+    {"name": "Intermediate", "min_soc_credit": 16, "max_soc_credit": 30},
+    {"name": "Expert", "min_soc_credit": 31, "max_soc_credit": 50}
+]
