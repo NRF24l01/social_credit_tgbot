@@ -1,5 +1,9 @@
 [
-    {"name": "Novice", "min_soc_credit": 0, "max_soc_credit": 15},
-    {"name": "Intermediate", "min_soc_credit": 16, "max_soc_credit": 30},
-    {"name": "Expert", "min_soc_credit": 31, "max_soc_credit": 50}
+    {"name": "Дамбоистр", "min_soc_credit": -100000000000000000000000, "max_soc_credit": -31},
+    {"name": "Дебилдер", "min_soc_credit": -30, "max_soc_credit": -11},
+    {"name": "Слесарь", "min_soc_credit": -10, "max_soc_credit": 20},
+    {"name": "Комунистр", "min_soc_credit": 21, "max_soc_credit": 30},
+    {"name": "Варистор", "min_soc_credit": 31, "max_soc_credit": 50},
+    {"name": "Доцентистр", "min_soc_credit": 51, "max_soc_credit": 70},
+    {"name": "Эйайстер", "min_soc_credit": 71, "max_soc_credit": 100000000000000000000000}
 ]

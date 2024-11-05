@@ -107,15 +107,15 @@ def credits_needed_for_next_rank(credits):
 def create_profile_message(user):
     rank = get_rank(user.social_credits)
     next_rank_credits = credits_needed_for_next_rank(user.social_credits)
-    return f"Rank: {rank}\nCredits: {user.social_credits}\nCredits needed for next rank: {next_rank_credits}"
+    return f"Ранг: {rank}\nКредиты: {user.social_credits}\nКредитов до следующего ранга: {next_rank_credits}"
 
 
 def main_keyboard(is_admin=False):
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
-    markup.add(KeyboardButton("Profile"), KeyboardButton("Global Ranking"))
-    markup.add(KeyboardButton("History"))
+    markup.add(KeyboardButton("Профиль"), KeyboardButton("Глобальный рейтинг"))
+    markup.add(KeyboardButton("История"))
     if is_admin:
-        markup.add(KeyboardButton("Change Credits"))
+        markup.add(KeyboardButton("Изменить социальный кредит"))
     return markup
 
 
@@ -132,11 +132,11 @@ async def start_command(message: types.Message):
         session.commit()
         logger.info(f"New user created: {username} (ID: {tg_id})")
     is_admin = (tg_id == ADMIN_ID)
-    await message.answer("Welcome! Use the buttons below to navigate.", reply_markup=main_keyboard(is_admin))
+    await message.answer("Добро пожаловать! Используйте кнопки для навигации.", reply_markup=main_keyboard(is_admin))
     logger.info(f"User {username} started the bot.")
 
 
-@dp.message_handler(lambda message: message.text == "Profile")
+@dp.message_handler(lambda message: message.text == "Профиль")
 async def profile_handler(message: types.Message):
     tg_id = message.from_user.id
     user = session.query(User).filter_by(tg_id=tg_id).first()
@@ -145,44 +145,44 @@ async def profile_handler(message: types.Message):
         await message.answer(profile_message)
         logger.info(f"User {user.username} requested profile.")
     else:
-        await message.answer("User not found.")
+        await message.answer("Пользователь не найден. Пропишите /start.")
         logger.warning(f"Profile request failed: User with ID {tg_id} not found.")
 
 
-@dp.message_handler(lambda message: message.text == "Global Ranking")
+@dp.message_handler(lambda message: message.text == "Глобальный рейтинг")
 async def global_ranking_handler(message: types.Message):
     users = session.query(User).order_by(User.social_credits.desc()).all()
     ranking = "Global Ranking:\n"
     for user in users:
-        ranking += f"{user.username}: {user.social_credits} credits\n"
+        ranking += f"{user.username}: {user.social_credits} кредитов\n"
     await message.answer(ranking)
     logger.info(f"User {message.from_user.username} requested global ranking.")
 
 
-@dp.message_handler(lambda message: message.text == "History")
+@dp.message_handler(lambda message: message.text == "История")
 async def history_handler(message: types.Message):
     tg_id = message.from_user.id
     user = session.query(User).filter_by(tg_id=tg_id).first()
     if user:
         history = session.query(SocialCreditHistory).filter_by(user_id=user.id).all()
-        history_message = "Credit History:\n"
+        history_message = "История изменения социальных кредитов:\n"
         for record in history:
-            history_message += f"{record.credits_change} credits: {record.reason}\n"
+            history_message += f"{record.credits_change} кредитов: {record.reason}\n"
         await message.answer(history_message)
         logger.info(f"User {user.username} requested history.")
     else:
-        await message.answer("User not found.")
+        await message.answer("Пользователь не найден. Пропишите /start.")
         logger.warning(f"History request failed: User with ID {tg_id} not found.")
 
 
 # Step 6: Admin functionalities
 
-@dp.message_handler(lambda message: message.text == "Change Credits" and message.from_user.id == ADMIN_ID)
+@dp.message_handler(lambda message: message.text == "Изменить социальный кредит" and message.from_user.id == ADMIN_ID)
 async def change_credits_handler(message: types.Message):
     users = session.query(User).all()
     user_buttons = [InlineKeyboardButton(user.username, callback_data=f'change_{user.id}') for user in users]
     markup = InlineKeyboardMarkup(row_width=1).add(*user_buttons)
-    await message.answer("Select a user to change credits:", reply_markup=markup)
+    await message.answer("Выберите пользователя для изменения соц кредитов:", reply_markup=markup)
     await ChangeCredit.waiting_for_user_selection.set()
     logger.info(f"Admin {message.from_user.username} initiated credit change process.")
 
@@ -191,7 +191,7 @@ async def change_credits_handler(message: types.Message):
 async def process_change_credits_callback(callback_query: types.CallbackQuery, state: FSMContext):
     user_id = int(callback_query.data.split('_')[1])
     await state.update_data(user_id=user_id)
-    await bot.send_message(callback_query.from_user.id, "Enter the amount of credits to change:")
+    await bot.send_message(callback_query.from_user.id, "Введите количество кредитов для изменения:")
     await ChangeCredit.waiting_for_credit_amount.set()
     logger.info(f"Admin {callback_query.from_user.username} selected user with ID {user_id} for credit change.")
 
@@ -201,11 +201,11 @@ async def change_credits_amount(message: types.Message, state: FSMContext):
     try:
         amount = int(message.text)
         await state.update_data(amount=amount)
-        await message.answer("Enter the reason for the credit change:")
+        await message.answer("Введите причину для изменения кредитов:")
         await ChangeCredit.waiting_for_reason.set()
         logger.info(f"Admin {message.from_user.username} entered amount {amount} for credit change.")
     except ValueError:
-        await message.answer("Please enter a valid number.")
+        await message.answer("Введено не целочисленное число.")
         logger.warning(f"Invalid credit amount entered by admin {message.from_user.username}: {message.text}")
 
 
@@ -221,11 +221,11 @@ async def change_credits_reason(message: types.Message, state: FSMContext):
         user.social_credits += amount
         session.add(SocialCreditHistory(user_id=user.id, credits_change=amount, reason=reason))
         session.commit()
-        await message.answer("Credits updated successfully.")
+        await message.answer("Кредиты изменены успешно.")
         logger.info(
             f"Admin {message.from_user.username} changed credits for user {user.username} by {amount}. Reason: {reason}")
     else:
-        await message.answer("User not found.")
+        await message.answer("Пользователь не найден.")
         logger.warning(f"Credit change failed: User with ID {user_id} not found.")
     await state.finish()
 
