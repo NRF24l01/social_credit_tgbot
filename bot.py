@@ -1,6 +1,3 @@
-# Step 1: Install necessary libraries (do this in your terminal)
-# pip install aiogram sqlalchemy aiosqlite
-
 import logging
 import os
 from dotenv import load_dotenv
