@@ -1,6 +1,6 @@
 version: '3'
 services:
-  bot:
+  soc_cred_tgbot:
     build: .
     container_name: soc_cred_tgbot
     volumes:
